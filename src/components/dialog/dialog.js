@@ -646,9 +646,14 @@ function MdDialogProvider($$interimElementProvider) {
       }
       if (options.clickOutsideToClose) {
         var target = element;
-        var clickHandler = function(ev) {
+        var originalElem;
+        var mousedownHandler = function(ev) {
+          originalElem = ev.target;
+        };
+
+        var mouseupHandler = function(ev) {
           // Only close if we click the flex container outside on the backdrop
-          if (ev.target === target[0]) {
+          if (ev.target === target[0] && originalElem === target[0]) {
             ev.stopPropagation();
             ev.preventDefault();
 
@@ -657,11 +662,13 @@ function MdDialogProvider($$interimElementProvider) {
         };
 
         // Add click listeners
-        target.on('click', clickHandler);
+        target.on('mousedown', mousedownHandler);
+        target.on('mouseup', mouseupHandler);
 
         // Queue remove listeners function
         removeListeners.push(function() {
-          target.off('click', clickHandler);
+          target.off('mousedown', mousedownHandler);
+          target.off('mouseup', mouseupHandler);
         });
       }
 
