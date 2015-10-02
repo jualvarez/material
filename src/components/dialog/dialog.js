@@ -646,14 +646,16 @@ function MdDialogProvider($$interimElementProvider) {
       }
       if (options.clickOutsideToClose) {
         var target = element;
-        var originalElem;
+        var sourceElem;
+
         var mousedownHandler = function(ev) {
-          originalElem = ev.target;
+          // Saving the source element for later checking if it was the backdrop
+          sourceElem = ev.target;
         };
 
         var mouseupHandler = function(ev) {
-          // Only close if we click the flex container outside on the backdrop
-          if (ev.target === target[0] && originalElem === target[0]) {
+          // Checking if the user clicked the backdrop and released on the backdrop
+          if (sourceElem === target[0] && ev.target === target[0]) {
             ev.stopPropagation();
             ev.preventDefault();
 
