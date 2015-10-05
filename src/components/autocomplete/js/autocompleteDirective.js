@@ -140,7 +140,8 @@ function MdAutocomplete () {
       floatingLabel:  '@?mdFloatingLabel',
       autoselect:     '=?mdAutoselect',
       menuClass:      '@?mdMenuClass',
-      inputId:        '@?mdInputId'
+      inputId:        '@?mdInputId',
+      inputBlur:      '@ngBlur',
     },
     template:     function (element, attr) {
       var noItemsTemplate = getNoItemsTemplate(),
@@ -217,6 +218,7 @@ function MdAutocomplete () {
                   ng-keydown="$mdAutocompleteCtrl.keydown($event)"\
                   ng-blur="$mdAutocompleteCtrl.blur()"\
                   ng-focus="$mdAutocompleteCtrl.focus()"\
+                  ng-trim="{{$mdAutocompleteCtrl.shouldTrim}}"\
                   aria-owns="ul-{{$mdAutocompleteCtrl.id}}"\
                   aria-label="{{floatingLabel}}"\
                   aria-autocomplete="list"\
@@ -238,6 +240,7 @@ function MdAutocomplete () {
                 ng-keydown="$mdAutocompleteCtrl.keydown($event)"\
                 ng-blur="$mdAutocompleteCtrl.blur()"\
                 ng-focus="$mdAutocompleteCtrl.focus()"\
+                ng-trim="$mdAutocompleteCtrl.shouldTrim"\
                 placeholder="{{placeholder}}"\
                 aria-owns="ul-{{$mdAutocompleteCtrl.id}}"\
                 aria-label="{{placeholder}}"\
