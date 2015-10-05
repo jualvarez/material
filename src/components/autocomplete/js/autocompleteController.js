@@ -34,6 +34,7 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
   ctrl.id         = $mdUtil.nextUid();
   ctrl.isDisabled = null;
   ctrl.isRequired = null;
+  ctrl.shouldTrim = null;
 
   //-- public methods
   ctrl.keydown                       = keydown;
@@ -135,8 +136,15 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
    */
   function configureWatchers () {
     var wait = parseInt($scope.delay, 10) || 0;
-    $attrs.$observe('disabled', function (value) { ctrl.isDisabled = value; });
-    $attrs.$observe('required', function (value) { ctrl.isRequired = value !== null; });
+    $attrs.$observe('disabled', function (value) { 
+      ctrl.isDisabled = value; 
+    });
+    $attrs.$observe('required', function (value) { 
+      ctrl.isRequired = value !== null; 
+    });
+    $attrs.$observe('ngTrim', function (value) { 
+      ctrl.shouldTrim = $scope.$parent.$eval(value);
+    });
     $scope.$watch('searchText', wait ? $mdUtil.debounce(handleSearchText, wait) : handleSearchText);
     $scope.$watch('selectedItem', selectedItemChange);
     angular.element($window).on('resize', positionDropdown);
@@ -344,7 +352,11 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
    */
   function blur () {
     hasFocus = false;
-    if (!noBlur) ctrl.hidden = true;
+    if (!noBlur) {
+      ctrl.hidden = true;
+      if ($scope.inputBlur !== undefined)
+        $scope.$parent.$eval($scope.inputBlur);
+    }
   }
 
   /**
