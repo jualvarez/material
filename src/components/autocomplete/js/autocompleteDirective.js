@@ -240,7 +240,11 @@ function MdAutocomplete () {
                 ng-keydown="$mdAutocompleteCtrl.keydown($event)"\
                 ng-blur="$mdAutocompleteCtrl.blur()"\
                 ng-focus="$mdAutocompleteCtrl.focus()"\
+<<<<<<< HEAD
                 ng-trim="{{$mdAutocompleteCtrl.shouldTrim}}"\
+=======
+                ng-trim="$mdAutocompleteCtrl.shouldTrim"\
+>>>>>>> 62485b51eeadef397ffddbbf62deabf0377a928f
                 placeholder="{{placeholder}}"\
                 aria-owns="ul-{{$mdAutocompleteCtrl.id}}"\
                 aria-label="{{placeholder}}"\
