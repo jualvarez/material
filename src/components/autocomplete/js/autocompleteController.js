@@ -429,14 +429,15 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
    * @returns {*}
    */
   function getDisplayValue (item) {
-    return $q.when(getItemText(item) || item);
+    var itemText = getItemText(item);
+    return $q.when(itemText === undefined ? item : itemText);
 
     /**
      * Getter function to invoke user-defined expression (in the directive)
      * to convert your object to a single string.
      */
     function getItemText (item) {
-      return (item && $scope.itemText) ? $scope.itemText(getItemAsNameVal(item)) : null;
+      return (item && $scope.itemText) ? $scope.itemText(getItemAsNameVal(item)) : undefined;
     }
   }
 
