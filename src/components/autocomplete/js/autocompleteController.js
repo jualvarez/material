@@ -352,11 +352,12 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
    */
   function blur () {
     hasFocus = false;
-    if (!noBlur) {
+    if (!noBlur)
       ctrl.hidden = true;
+    
+    if (ctrl.hidden)
       if ($scope.inputBlur !== undefined)
         $scope.$parent.$eval($scope.inputBlur);
-    }
   }
 
   /**
