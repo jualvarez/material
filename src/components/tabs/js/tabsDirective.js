@@ -53,15 +53,17 @@
  *
  * @param {integer=} md-selected Index of the active/selected tab
  * @param {boolean=} md-no-ink If present, disables ink ripple effects.
- * @param {boolean=} md-no-bar If present, disables the selection ink bar.
+ * @param {boolean=} md-no-ink-bar If present, disables the selection ink bar.
  * @param {string=}  md-align-tabs Attribute to indicate position of tab buttons: `bottom` or `top`; default is `top`
  * @param {string=} md-stretch-tabs Attribute to indicate whether or not to stretch tabs: `auto`, `always`, or `never`; default is `auto`
  * @param {boolean=} md-dynamic-height When enabled, the tab wrapper will resize based on the contents of the selected tab
+ * @param {boolean=} md-border-bottom If present, shows a solid `1px` border between the tabs and their content
  * @param {boolean=} md-center-tabs When enabled, tabs will be centered provided there is no need for pagination
  * @param {boolean=} md-no-pagination When enabled, pagination will remain off
  * @param {boolean=} md-swipe-content When enabled, swipe gestures will be enabled for the content area to jump between tabs
- * @param {boolean=} md-no-disconnect If your tab content has background tasks (ie. event listeners), you will want to include this to prevent the scope from being disconnected
+ * @param {boolean=} md-enable-disconnect When enabled, scopes will be disconnected for tabs that are not being displayed.  This provides a performance boost, but may also cause unexpected issues and is not recommended for most users.
  * @param {boolean=} md-autoselect When present, any tabs added after the initial load will be automatically selected
+ * @param {boolean=} md-no-select-click When enabled, click events will not be fired when selecting tabs
  *
  * @usage
  * <hljs lang="html">
@@ -119,7 +121,7 @@ function MdTabs () {
             '<md-icon md-svg-icon="md-tabs-arrow"></md-icon> ' +
           '</md-next-button> ' +
           '<md-tabs-canvas ' +
-              'tabindex="0" ' +
+              'tabindex="{{ $mdTabsCtrl.hasFocus ? -1 : 0 }}" ' +
               'aria-activedescendant="tab-item-{{$mdTabsCtrl.tabs[$mdTabsCtrl.focusIndex].id}}" ' +
               'ng-focus="$mdTabsCtrl.redirectFocus()" ' +
               'ng-class="{ ' +
@@ -134,7 +136,6 @@ function MdTabs () {
               '<md-tab-item ' +
                   'tabindex="-1" ' +
                   'class="md-tab" ' +
-                  'style="max-width: {{ $mdTabsCtrl.maxTabWidth + \'px\' }}" ' +
                   'ng-repeat="tab in $mdTabsCtrl.tabs" ' +
                   'role="tab" ' +
                   'aria-controls="tab-content-{{::tab.id}}" ' +
@@ -153,7 +154,7 @@ function MdTabs () {
                   'md-scope="::tab.parent"></md-tab-item> ' +
               '<md-ink-bar></md-ink-bar> ' +
             '</md-pagination-wrapper> ' +
-            '<div class="md-visually-hidden md-dummy-wrapper"> ' +
+            '<div class="_md-visually-hidden md-dummy-wrapper"> ' +
               '<md-dummy-tab ' +
                   'class="md-tab" ' +
                   'tabindex="-1" ' +
@@ -170,9 +171,10 @@ function MdTabs () {
             '</div> ' +
           '</md-tabs-canvas> ' +
         '</md-tabs-wrapper> ' +
-        '<md-tabs-content-wrapper ng-show="$mdTabsCtrl.hasContent && $mdTabsCtrl.selectedIndex >= 0"> ' +
+        '<md-tabs-content-wrapper ng-show="$mdTabsCtrl.hasContent && $mdTabsCtrl.selectedIndex >= 0" class="_md"> ' +
           '<md-tab-content ' +
               'id="tab-content-{{::tab.id}}" ' +
+              'class="_md" ' +
               'role="tabpanel" ' +
               'aria-labelledby="tab-item-{{::tab.id}}" ' +
               'md-swipe-left="$mdTabsCtrl.swipeContent && $mdTabsCtrl.incrementIndex(1)" ' +

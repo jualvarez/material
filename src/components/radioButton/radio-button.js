@@ -60,7 +60,9 @@ function mdRadioGroupDirective($mdUtil, $mdConstant, $mdTheming, $timeout) {
   };
 
   function linkRadioGroup(scope, element, attr, ctrls) {
+    element.addClass('_md');     // private md component indicator for styling
     $mdTheming(element);
+    
     var rgCtrl = ctrls[0];
     var ngModelCtrl = ctrls[1] || $mdUtil.fakeNgModel();
 
@@ -95,7 +97,17 @@ function mdRadioGroupDirective($mdUtil, $mdConstant, $mdTheming, $timeout) {
      */
     function keydownListener(ev) {
       var keyCode = ev.which || ev.keyCode;
-      switch(keyCode) {
+
+      // Only listen to events that we originated ourselves
+      // so that we don't trigger on things like arrow keys in
+      // inputs.
+
+      if (keyCode != $mdConstant.KEY_CODE.ENTER &&
+          ev.currentTarget != ev.target) {
+        return;
+      }
+
+      switch (keyCode) {
         case $mdConstant.KEY_CODE.LEFT_ARROW:
         case $mdConstant.KEY_CODE.UP_ARROW:
           ev.preventDefault();
@@ -117,6 +129,7 @@ function mdRadioGroupDirective($mdUtil, $mdConstant, $mdTheming, $timeout) {
           }
           break;
       }
+
     }
   }
 
@@ -208,7 +221,7 @@ function mdRadioGroupDirective($mdUtil, $mdConstant, $mdTheming, $timeout) {
  * @param {string=} ngChange Angular expression to be executed when input changes due to user
  *    interaction with the input element.
  * @param {string} ngValue Angular expression which sets the value to which the expression should
- *    be set when selected.*
+ *    be set when selected.
  * @param {string} value The value to which the expression should be set when selected.
  * @param {string=} name Property name of the form under which the control is published.
  * @param {string=} aria-label Adds label to radio button for accessibility.
@@ -236,11 +249,11 @@ function mdRadioButtonDirective($mdAria, $mdUtil, $mdTheming) {
     restrict: 'E',
     require: '^mdRadioGroup',
     transclude: true,
-    template: '<div class="md-container" md-ink-ripple md-ink-ripple-checkbox>' +
-                '<div class="md-off"></div>' +
-                '<div class="md-on"></div>' +
+    template: '<div class="_md-container" md-ink-ripple md-ink-ripple-checkbox>' +
+                '<div class="_md-off"></div>' +
+                '<div class="_md-on"></div>' +
               '</div>' +
-              '<div ng-transclude class="md-label"></div>',
+              '<div ng-transclude class="_md-label"></div>',
     link: link
   };
 

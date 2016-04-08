@@ -102,6 +102,23 @@
  *   <!-- menu-content -->
  * </md-menu>
  * </hljs>
+
+ * ### Preventing close
+ *
+ * Sometimes you would like to be able to click on a menu item without having the menu
+ * close. To do this, ngMaterial exposes the `md-prevent-menu-close` attribute which
+ * can be added to a button inside a menu to stop the menu from automatically closing.
+ * You can then close the menu programatically by injecting `$mdMenu` and calling 
+ * `$mdMenu.hide()`.
+ *
+ * <hljs lang="html">
+ * <md-menu-item>
+ *   <md-button ng-click="doSomething()" aria-label="Do something" md-prevent-menu-close="md-prevent-menu-close">
+ *     <md-icon md-menu-align-target md-svg-icon="call:phone"></md-icon>
+ *     Do Something
+ *   </md-button>
+ * </md-menu-item>
+ * </hljs>
  *
  * @usage
  * <hljs lang="html">
@@ -115,7 +132,7 @@
  * </md-menu>
  * </hljs>
  *
- * @param {string} md-po*ition-mode The position mode in the form of
+ * @param {string} md-position-mode The position mode in the form of
  *           `x`, `y`. Default value is `target`,`target`. Right now the `x` axis
  *           also suppports `target-right`.
  * @param {string} md-offset An offset to apply to the dropdown after positioning
@@ -167,36 +184,34 @@ function MenuDirective($mdUtil) {
         if (!menuEl.hasAttribute('md-position-mode')) {
           menuEl.setAttribute('md-position-mode', 'cascade');
         }
-        menuEl.classList.add('md-nested-menu');
+        menuEl.classList.add('_md-nested-menu');
         menuEl.setAttribute('md-nest-level', nestingDepth + 1);
-        menuEl.setAttribute('role', 'menu');
       });
     }
     return link;
   }
 
-  function link(scope, element, attrs, ctrls) {
+  function link(scope, element, attr, ctrls) {
     var mdMenuCtrl = ctrls[0];
     var isInMenuBar = ctrls[1] != undefined;
     // Move everything into a md-menu-container and pass it to the controller
-    var menuContainer = angular.element(
-      '<div class="md-open-menu-container md-whiteframe-z2"></div>'
-    );
+    var menuContainer = angular.element( '<div class="_md _md-open-menu-container md-whiteframe-z2"></div>');
     var menuContents = element.children()[1];
-    menuContainer.append(menuContents);
-    if (isInMenuBar) {
-      element.append(menuContainer);
-      menuContainer[0].style.display = 'none';
-    }
-    mdMenuCtrl.init(menuContainer, { isInMenuBar: isInMenuBar });
 
-    scope.$on('$destroy', function() {
-      mdMenuCtrl
-        .destroy()
-        .finally(function(){
-          menuContainer.remove();
-        });
+    element.addClass('_md');     // private md component indicator for styling
+
+    if (!menuContents.hasAttribute('role')) {
+      menuContents.setAttribute('role', 'menu');
+    }
+    menuContainer.append(menuContents);
+
+    element.on('$destroy', function() {
+      menuContainer.remove();
     });
+
+    element.append(menuContainer);
+    menuContainer[0].style.display = 'none';
+    mdMenuCtrl.init(menuContainer, { isInMenuBar: isInMenuBar });
 
   }
 }

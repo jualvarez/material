@@ -16,6 +16,23 @@ describe('<md-tooltip> directive', function() {
     element = undefined;
   });
 
+  it('should support dynamic directions', function() {
+    var error;
+
+    try {
+      buildTooltip(
+        '<md-button>' +
+        'Hello' +
+        '<md-tooltip md-direction="{{direction}}">Tooltip</md-tooltip>' +
+        '</md-button>'
+      );
+    } catch(e) {
+      error = e;
+    }
+
+    expect(error).toBe(undefined);
+  });
+
   it('should preserve parent text', function(){
       buildTooltip(
         '<md-button>' +
@@ -24,7 +41,7 @@ describe('<md-tooltip> directive', function() {
         '</md-button>'
       );
 
-      expect(element.attr('aria-label')).toBeUndefined();
+      expect(element.attr('aria-label')).toBe("Hello");
   });
 
   it('should label parent', function(){
@@ -100,7 +117,7 @@ describe('<md-tooltip> directive', function() {
       showTooltip(true);
 
       expect(findTooltip().length).toBe(1);
-      expect(findTooltip().hasClass('md-show')).toBe(true);
+      expect(findTooltip().hasClass('_md-show')).toBe(true);
 
       showTooltip(false);
 
@@ -139,25 +156,6 @@ describe('<md-tooltip> directive', function() {
 
       triggerEvent('blur');
       expect($rootScope.testModel.isVisible).toBe(false);
-    });
-
-    it('should set visible on touchstart and touchend', function() {
-      buildTooltip(
-        '<md-button>' +
-          'Hello' +
-          '<md-tooltip md-visible="testModel.isVisible">' +
-            'Tooltip' +
-          '</md-tooltip>' +
-        '</md-button>'
-      );
-
-
-      triggerEvent('touchstart');
-      expect($rootScope.testModel.isVisible).toBe(true);
-
-      triggerEvent('touchend');
-      expect($rootScope.testModel.isVisible).toBe(false);
-
     });
 
     it('should not be visible on mousedown and then mouseleave', inject(function($document) {
@@ -207,6 +205,7 @@ describe('<md-tooltip> directive', function() {
       triggerEvent('focus');
       expect($rootScope.testModel.isVisible).toBe(false);
     }));
+
   });
 
   // ******************************************************

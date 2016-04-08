@@ -3,6 +3,15 @@ describe('radioButton', function() {
 
   beforeEach(module('material.components.radioButton'));
 
+  it('should have `._md` class indicator',inject(function($compile, $rootScope) {
+    var element = $compile('<md-radio-group ng-model="color">' +
+                               '<md-radio-button value="blue"></md-radio-button>' +
+                               '<md-radio-button value="green"></md-radio-button>' +
+                             '</md-radio-group>')($rootScope);
+
+    expect(element.hasClass('_md')).toBe(true);
+  }));
+
   it('should set checked css class', inject(function($compile, $rootScope) {
     var element = $compile('<md-radio-group ng-model="color">' +
                             '<md-radio-button value="blue"></md-radio-button>' +
@@ -106,7 +115,9 @@ describe('radioButton', function() {
     var rbGroupElement = element.eq(0);
     rbGroupElement.triggerHandler({
       type: 'keydown',
-      keyCode: $mdConstant.KEY_CODE.RIGHT_ARROW
+      keyCode: $mdConstant.KEY_CODE.RIGHT_ARROW,
+      currentTarget: rbGroupElement[0],
+      target: rbGroupElement[0]
     });
 
     expect($rootScope.color).toEqual('green');
@@ -143,7 +154,9 @@ describe('radioButton', function() {
     element.triggerHandler('mousedown');
     element.triggerHandler({
       type: 'keydown',
-      keyCode: $mdConstant.KEY_CODE.DOWN_ARROW
+      keyCode: $mdConstant.KEY_CODE.DOWN_ARROW,
+      currentTarget: element[0],
+      target: element[0]
     });
     expect(element[0]).toHaveClass('md-focused');
   }));
@@ -257,6 +270,8 @@ describe('radioButton', function() {
       function rightArrow() {
           rbGroupElement.triggerHandler({
             type: 'keydown',
+            target: rbGroupElement[0],
+            currentTarget: rbGroupElement[0],
             keyCode: $mdConstant.KEY_CODE.RIGHT_ARROW
           });
         }
