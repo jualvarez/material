@@ -8,16 +8,18 @@ angular
   .controller('PositionDemoCtrl', function DemoCtrl($mdDialog) {
     var originatorEv;
 
-    this.openMenu = function($mdOpenMenu, ev) {
+    this.menuHref = "http://www.google.com/design/spec/components/menus.html#menus-specs";
+
+    this.openMenu = function($mdMenu, ev) {
       originatorEv = ev;
-      $mdOpenMenu(ev);
+      $mdMenu.open(ev);
     };
 
     this.announceClick = function(index) {
       $mdDialog.show(
         $mdDialog.alert()
           .title('You clicked!')
-          .content('You clicked the menu item at index ' + index)
+          .textContent('You clicked the menu item at index ' + index)
           .ok('Nice')
           .targetEvent(originatorEv)
       );

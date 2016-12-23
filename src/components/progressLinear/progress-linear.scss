@@ -9,6 +9,10 @@ md-progress-linear {
   padding-top: 0 !important;
   margin-bottom: 0 !important;
 
+  &._md-progress-linear-disabled {
+    visibility: hidden;
+  }
+
   .md-container {
     display:block;
     position: relative;
@@ -17,7 +21,7 @@ md-progress-linear {
     width:100%;
     height: $progress-linear-bar-height;
 
-    transform: translate(0, 0) scale(1, 1);;
+    transform: translate(0, 0) scale(1, 1);
 
     .md-bar {
       position: absolute;
@@ -83,7 +87,8 @@ md-progress-linear {
       }
     }
 
-    &.ng-hide {
+    &.ng-hide
+    ._md-progress-linear-disabled & {
       animation: none;
 
       .md-bar1 {

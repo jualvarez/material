@@ -3,6 +3,7 @@ var filter = require('gulp-filter');
 var through2 = require('through2');
 var lazypipe = require('lazypipe');
 var gutil = require('gulp-util');
+var autoprefixer = require('gulp-autoprefixer');
 var Buffer = require('buffer').Buffer;
 var fs = require('fs');
 
@@ -63,7 +64,7 @@ exports.readModuleDemos = function(moduleName, fileTasks) {
         css:[], html:[], js:[]
       };
 
-      gulp.src(demoFolder.path + '**/*', { base: path.dirname(demoFolder.path) })
+      gulp.src(demoFolder.path + '/**/*', { base: path.dirname(demoFolder.path) })
         .pipe(fileTasks(demoId))
         .pipe(through2.obj(function(file, enc, cb) {
           if (/index.html$/.test(file.path)) {
@@ -196,7 +197,9 @@ exports.buildNgMaterialDefinition = function() {
 };
 
 function moduleNameToClosureName(name) {
-  return 'ng.' + name;
+  // For Closure, all modules start with "ngmaterial". We specifically don't use `ng.`
+  // because it conflicts with other packages under `ng.`.
+  return 'ng' + name;
 }
 exports.addJsWrapper = function(enforce) {
   return through2.obj(function(file, enc, next) {
@@ -219,7 +222,8 @@ exports.addClosurePrefixes = function() {
     if (module) {
       var closureModuleName = moduleNameToClosureName(module.name);
       var requires = (module.dependencies || []).sort().map(function(dep) {
-        return dep.indexOf(module.name) === 0 ? '' : 'goog.require(\'' + moduleNameToClosureName(dep) + '\');';
+        if (dep.indexOf(module.name) === 0 || /material\..+/g.test(dep) == false) return '';
+        return 'goog.require(\'' + moduleNameToClosureName(dep) + '\');';
       }).join('\n');
 
       file.contents = new Buffer([
@@ -290,7 +294,7 @@ exports.cssToNgConstant = function(ngModule, factoryName) {
   return through2.obj(function(file, enc, next) {
 
     var template = '(function(){ \nangular.module("%1").constant("%2", "%3"); \n})();\n\n';
-    var output = file.contents.toString().replace(/\n/g, '').replace(/\"/,'\\"');
+    var output = file.contents.toString().replace(/\n/g, '').replace(/\"/g,'\\"');
 
     var jsFile = new gutil.File({
       base: file.base,
@@ -305,4 +309,15 @@ exports.cssToNgConstant = function(ngModule, factoryName) {
     this.push(jsFile);
     next();
   });
+};
+
+exports.autoprefix = function() {
+
+  return autoprefixer({browsers: [
+    'last 2 versions',
+    'not ie <= 10',
+    'not ie_mob <= 10',
+    'last 4 Android versions',
+    'Safari >= 8'
+  ]});
 };

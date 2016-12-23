@@ -1,12 +1,13 @@
 (function() {
-  DocsApp
+  angular.module('docsApp')
     .factory('codepenDataAdapter', CodepenDataAdapter)
     .factory('codepen', ['$demoAngularScripts', '$document', 'codepenDataAdapter', Codepen]);
 
   // Provides a service to open a code example in codepen.
   function Codepen($demoAngularScripts, $document, codepenDataAdapter) {
 
-    var CODEPEN_API = 'https://codepen.io/pen/define/';
+    // The following URL must be HTTP and not HTTPS to allow us to do localhost testing
+    var CODEPEN_API = 'http://codepen.io/pen/define/';
 
     return {
       editOnCodepen: editOnCodepen
@@ -40,7 +41,14 @@
     function escapeJsonQuotes(json) {
       return JSON.stringify(json)
         .replace(/'/g, "&amp;apos;")
-        .replace(/"/g, "&amp;quot;");
+        .replace(/"/g, "&amp;quot;")
+        /**
+         * Codepen was unescaping &lt; (<) and &gt; (>) which caused, on some demos,
+         * an unclosed elements (like <md-select>). 
+         * Used different unicode lookalike characters so it won't be considered as an element
+         */
+        .replace(/&amp;lt;/g, "&#x02C2;") // http://graphemica.com/%CB%82
+        .replace(/&amp;gt;/g, "&#x02C3;"); // http://graphemica.com/%CB%83
     }
   }
 
@@ -48,13 +56,16 @@
   // additional fields not used by this service. http://blog.codepen.io/documentation/api/prefill
   function CodepenDataAdapter() {
 
-    var CORE_JS  = 'https://material.angularjs.org/HEAD/angular-material.js';   //'https://localhost:8080/angular-material.js';
-    var CORE_CSS = 'https://material.angularjs.org/HEAD/angular-material.css';  //'https://localhost:8080/angular-material.css';
-    var DOC_CSS  = 'https://material.angularjs.org/HEAD/docs.css';              // CSS overrides for custom docs
+    // The following URL's need to use `localhost` as these values get replaced during release
+    var CORE_JS  = 'http://localhost:8080/angular-material.js';
+    var CORE_CSS = 'http://localhost:8080/angular-material.css';
+    var DOC_CSS  = 'http://localhost:8080/docs.css';              // CSS overrides for custom docs
 
     var LINK_FONTS_ROBOTO = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">';
 
-    var ASSET_CACHE_JS = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-114/assets-cache.js';
+    var UNSECURE_CACHE_JS = 'http://ngmaterial.assets.s3.amazonaws.com/svg-assets-cache.js';
+    var ASSET_CACHE_JS = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-114/svg-assets-cache.js';
+
 
     return {
       translate: translate
@@ -65,7 +76,7 @@
     function translate(demo, externalScripts) {
       var files = demo.files;
 
-      return {
+      return appendLicenses({
         title: demo.title,
         html: processHtml(demo),
         head: LINK_FONTS_ROBOTO,
@@ -73,15 +84,16 @@
         js: processJs(files.js),
         css: mergeFiles( files.css ).join(' '),
 
-        js_external: externalScripts.concat([CORE_JS, ASSET_CACHE_JS]).join(';'),
+        js_external: externalScripts.concat([ASSET_CACHE_JS, CORE_JS]).join(';'),
         css_external: [CORE_CSS, DOC_CSS].join(';')
-      };
+      });
     }
 
     // Modifies index.html with necessary changes in order to display correctly in codepen
     // See each processor to determine how each modifies the html
     function processHtml(demo) {
-      var index = demo.files.index.contents;
+
+      var allContent = demo.files.index.contents;
 
       var processors = [
         applyAngularAttributesToParentElement,
@@ -90,11 +102,41 @@
       ];
 
       processors.forEach(function(processor) {
-        index = processor(index, demo);
+        allContent = processor(allContent, demo);
       });
 
-      return index;
+      return allContent;
     }
+
+    /**
+     * Append MIT License information to all CodePen source samples(HTML, JS, CSS)
+     */
+    function appendLicenses(data) {
+
+      data.html = appendLicenseFor(data.html, 'html');
+      data.js   = appendLicenseFor(data.js, 'js');
+      data.css  = appendLicenseFor(data.css, 'css');
+
+      function appendLicenseFor(content, lang) {
+            var commentStart = '', commentEnd = '';
+
+        switch(lang) {
+          case 'html' : commentStart = '<!--'; commentEnd = '-->'; break;
+          case 'js'   : commentStart = '/**';  commentEnd = '**/'; break;
+          case 'css'  : commentStart = '/*';   commentEnd = '*/';  break;
+        }
+
+        return content + '\n\n'+
+          commentStart + '\n'+
+          'Copyright 2016 Google Inc. All Rights Reserved. \n'+
+          'Use of this source code is governed by an MIT-style license that can be found'+
+          'in the LICENSE file at http://material.angularjs.org/HEAD/license.\n'+
+          commentEnd;
+      }
+
+      return data;
+    }
+
 
     // Applies modifications the javascript prior to sending to codepen.
     // Currently merges js files and replaces the module with the Codepen
@@ -151,13 +193,18 @@
         .replace(/&/g, "&amp;");
     }
 
-    // Required to make codepen work. Demos define their own module when running on the
-    // docs site.  In order to ensure the codepen example can use the asset-cache, the
+    // Required to make codePen work. Demos define their own module when running on the
+    // docs site.  In order to ensure the codepen example can use the svg-asset-cache.js, the
     // module needs to match so that the $templateCache is populated with the necessary
     // assets.
+
     function replaceDemoModuleWithCodepenModule(file) {
-      var matchAngularModule =  /\.module\(('[^']*'|"[^"]*")\s*,(?:\s*\[([^\]]*)\])?/g;
-      return file.replace(matchAngularModule, ".module('MyApp'");
+      var matchAngularModule =  /\.module\(('[^']*'|"[^"]*")\s*,(\s*\[([^\]]*)\]\s*\))/ig;
+      var modules = "['ngMaterial', 'ngMessages', 'material.svgAssetsCache']";
+
+      // See scripts.js for list of external Angular libraries used for the demos
+
+      return file.replace(matchAngularModule, ".module('MyApp',"+ modules + ")");
     }
   }
 })();

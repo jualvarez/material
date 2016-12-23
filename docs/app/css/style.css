@@ -7,14 +7,15 @@ body {
   font-size: 1.6rem;
 }
 
-body {
+/* This styling should be not applied to codepen demos, so we need to add a unique identifier. */
+body.docs-body {
   overflow: hidden;
   max-width: 100%;
   max-height: 100%;
 }
 
 .md-api-table {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   max-width: 100%;
   width: 100%;
   border-spacing: 0;
@@ -22,25 +23,58 @@ body {
   overflow: hidden;
 }
 
+/* Center the doc tool icons at the top */
+.docs-tools .md-button.md-icon-button {
+  min-height: 0;
+  height: auto;
+}
+
+.docs-anchor {
+  color: inherit;
+}
+
+.md-fab.docs-scroll-fab {
+  position: fixed !important;
+
+  transform: scale(0);
+  transition: transform 0.2s;
+}
+
+.docs-scroll-fab.scrolling {
+  transform: scale(1);
+}
+
+#license-footer {
+  align-self: flex-end;
+  padding: 16px 32px;
+  width: 100%;
+
+  text-align: center;
+  font-size: small;
+  border-top: 1px solid #ddd;
+}
+
+
+.training_link {
+  color: rgb(255,82,82);
+  text-transform: none;
+}
+
+.training_site {
+  text-transform: none;
+}
+
+.training_info {
+  opacity: 0.4;
+  text-transform: none;
+}
 /***************
  * TYPE DEFAULTS
  ***************/
 a {
-  color: #106CC8;
   text-decoration: none;
   font-weight: 400;
-  border-bottom: 1px solid rgba(64, 84, 178, 0.25);
-  -webkit-transition: border-bottom 0.35s;
-  -moz-transition: border-bottom 0.35s;
-  -ms-transition: border-bottom 0.35s;
-  -o-transition: border-bottom 0.35s;
   transition: border-bottom 0.35s;
-}
-a:hover, a:focus {
-  border-bottom: 1px solid #4054B2;
-}
-a.md-button {
-  border-bottom: none;
 }
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1rem;
@@ -103,6 +137,7 @@ strong {
   background-color: #4C9EF0;
   color: white;
 }
+
 blockquote {
   border-left: 3px solid rgba(0, 0, 0, 0.12);
   font-style: italic;
@@ -140,8 +175,6 @@ ul.skip-links li a {
   text-decoration: none;
   top: 0;
   width: 92%;
-  -webkit-transition: opacity   0.15s linear;
-  -moz-transition: opacity  0.15s linear;
   transition: opacity   0.15s linear;
 }
 ul.skip-links li a:focus {
@@ -161,10 +194,6 @@ pre {
 pre > code.highlight {
   padding: 16px;
   font-weight: 400;
-  -webkit-user-select: initial;
-  -moz-user-select: initial;
-  -ms-user-select: initial;
-  user-select: initial;
 }
 
 pre, code {
@@ -214,9 +243,9 @@ code:not(.highlight) {
 .site-sidenav,
 .site-sidenav.md-locked-open-add-active,
 .site-sidenav.md-locked-open {
-  width: 256px;
-  min-width: 256px;
-  max-width: 256px;
+  width:     272px;
+  min-width: 272px;
+  max-width: 272px;
 }
 .site-sidenav > * {
   min-width: 218px;
@@ -260,6 +289,14 @@ code:not(.highlight) {
   white-space: normal;
   width: 100%;
 }
+
+html[dir=rtl] .docs-menu .md-button,
+body[dir=rtl] .docs-menu .md-button {
+  unicode-bidi: embed;
+  text-align: right;
+}
+
+
 .docs-menu .md-button:hover,
 .docs-menu .md-button:focus {
   background: #267ED5 !important;
@@ -306,20 +343,19 @@ code:not(.highlight) {
   width: 100%;
   color: rgba(255, 255, 255, 0.54)
 }
-.docs-menu li.parentActive,
-.docs-menu li.parentActive .menu-toggle-list {
-  /*background-color: #2C80D2 !important;*/
+
+
+html[dir=rtl] .menu-heading,
+body[dir=rtl] .menu-heading {
+  unicode-bidi: embed;
+  text-align: right;
 }
+
 .menu-toggle-list {
   overflow: hidden;
   position: relative;
   z-index: 1;
-  -webkit-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
-  -webkit-transition-property: height;
-  -moz-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
-  -moz-transition-property: height;
-  transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
-  transition-property: height;
+  height: 0;
 }
 .docs-menu .menu-toggle-list a.md-button {
   display: block;
@@ -329,8 +365,11 @@ code:not(.highlight) {
   font-weight: 500;
 }
 
-ul#docs-menu-Directives {
+.parent-list-item:last-child {
   margin-bottom: 20px;
+
+  /* Prevent the hidden License link from causing a double bottom-border */
+  border-bottom: none;
 }
 .md-button-toggle .md-toggle-icon {
   display: block;
@@ -338,13 +377,10 @@ ul#docs-menu-Directives {
   speak: none;
   vertical-align: middle;
   transform: rotate(180deg);
-  -webkit-transform: rotate(180deg);
   transition: transform 0.3s ease-in-out;
-  -webkit-transition: -webkit-transform 0.3s ease-in-out;
 }
 .md-button-toggle .md-toggle-icon.toggled {
   transform: rotate(0deg);
-  -webkit-transform: rotate(0deg);
 }
 
 /* End Docs Menu */
@@ -370,10 +406,6 @@ ul#docs-menu-Directives {
 .nav-header {
   background-color: #106CC8;
   background: linear-gradient(#185694, #106cc8);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #185694), color-stop(1, #106cc8));
-  background: -webkit-linear-gradient(top, #185694 0%, #106cc8 100%);
-  background: -moz-linear-gradient(top, #185694 0%, #106cc8 100%);
-  background: linear-gradient(top, #185694 0%, #106cc8 100%);
   border-bottom: 1px solid #267ED5;
   flex-shrink: 0;
   z-index: 2;
@@ -399,6 +431,7 @@ a.docs-logo {
 }
 .md-breadcrumb md-icon {
   color: #666 !important;
+  fill: #666 !important;
 }
 .md-breadcrumb-page {
   display: inline-block;
@@ -410,16 +443,13 @@ a.docs-logo {
   margin: 0 24px;
   width: auto;
 }
-.docs-tools .md-button {
-  padding: 0;
-  margin: 0 0 0 8px;
-}
 .docs-tools .md-button,
 .docs-tools .md-button md-icon {
   color: #666 !important;
 }
 .docs-toolbar-tools .md-button md-icon {
   color: #666 !important;
+  fill: #666 !important;
 }
 @media (max-width: 400px) {
   .docs-tools {
@@ -442,14 +472,12 @@ docs-demo {
 .demo-container {
   border-radius: 4px;
   margin-bottom: 16px;
-  -webkit-transition: 0.02s padding cubic-bezier(0.35, 0, 0.25, 1);
   transition: 0.02s padding cubic-bezier(0.35, 0, 0.25, 1);
   position: relative;
   padding-bottom: 0;
 }
 .demo-source-tabs {
   z-index: 1;
-  -webkit-transition: all 0.45s cubic-bezier(0.35, 0, 0.25, 1);
   transition: all 0.45s cubic-bezier(0.35, 0, 0.25, 1);
   height: 448px;
   background: #fff;
@@ -484,13 +512,8 @@ md-tabs.demo-source-tabs .active md-tab-label {
 }
 .demo-content {
   position: relative;
-  overflow:hidden;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -moz-flex;
-  display: -ms-flexbox;
   display: flex;
+  overflow: hidden;
 }
 .small-demo .demo-source-tabs:not(.ng-hide) {
   height: 224px;
@@ -500,25 +523,22 @@ md-tabs.demo-source-tabs .active md-tab-label {
 }
 
 .doc-content > * {
-  -webkit-box-flex: 1 1 auto;
-  -webkit-flex: 1 1 auto;
-  -moz-box-flex: 1 1 auto;
-  -moz-flex: 1 1 auto;
-  -ms-flex: 1 1 auto;
   flex: 1 1 auto;
 }
 .demo-content > * {
-  -webkit-box-flex: 1 1 0%;
-  -webkit-flex: 1 1 0%;
-  -moz-box-flex: 1 1 0%;
-  -moz-flex: 1 1 0%;
-  -ms-flex: 1 1 0%;
   flex: 1 1 0%;
 }
+
 .demo-content > div[layout-fill] {
   min-height: 448px;
 }
+.demo-content > div.layout-fill {
+  min-height: 448px;
+}
 .small-demo .demo-content > div[layout-fill] {
+  min-height: 224px;
+}
+.small-demo .demo-content > div.layout-fill {
   min-height: 224px;
 }
 .layout-content .small-demo .demo-content > div[layout],
@@ -548,8 +568,6 @@ md-toolbar.demo-toolbar .md-button.active, md-toolbar.demo-toolbar .md-button.ac
 }
 
 md-toolbar.demo-toolbar .md-button {
-  -webkit-transition: all 0.3s linear;
-  -moz-transition: all 0.3s linear;
   transition: all 0.3s linear;
   color: #616161;
 }
@@ -604,7 +622,6 @@ ul.buckets li a {
   font-weight: 500;
   padding: 16px 0;
   text-decoration: none;
-  -webkit-transition: all 0.45s cubic-bezier(0.35, 0, 0.25, 1);
   background-color: #f6f6f6 !important;
   box-shadow: none !important;
   margin-right: 0;
@@ -654,9 +671,6 @@ header.api-profile-header > h2 {
   margin-right: 8px;
   text-align: center;
   margin-top: 14px;
-  -webkit-align-self: flex-start;
-  -moz-align-self: flex-start;
-  -ms-flex-item-align: start;
   align-self: flex-start;
 }
 .api-params-title {
@@ -674,8 +688,6 @@ ul.methods .method-function-syntax {
   font-weight: normal;
   font-size: 2.0rem;
   margin: 0;
-  -webkit-margin-before: 0;
-  -webkit-margin-after: 0;
 }
 
 h3 .method-function-syntax {
@@ -806,34 +818,6 @@ docs-demo .doc-demo-content {
   margin-bottom: 0;
 }
 
-/* ---------------------
-*  Demo Workarounds
-*
-*  Necessary for component demos that append DOM subtrees outside of the demo app.
-*  Because our docs build prepends CSS classes onto custom demo styles provided for developers,
-*  these styles are needed for the docs website.
-*/
-.autocomplete-custom-template li {
-  border-bottom: 1px solid #ccc;
-  height: auto;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  white-space: normal;
-}
-.autocomplete-custom-template li:last-child {
-  border-bottom-width: 0;
-}
-.autocomplete-custom-template .item-title,
-.autocomplete-custom-template .item-metadata {
-  display: block;
-  line-height: 2;
-}
-.autocomplete-custom-template .item-title md-icon {
-  height: 18px;
-  width: 18px;
-}
-
-
 /* Styles for Windows High Contrast mode */
 @media screen and (-ms-high-contrast: active) {
   a {
@@ -845,9 +829,87 @@ docs-demo .doc-demo-content {
 }
 
 .no-transition {
-  -webkit-transition: none !important;
-  -moz-transition:    none !important;
-  -ms-transition:     none !important;
-  -o-transition:      none !important;
-  transition:         none !important;
+  transition: none !important;
+}
+
+table.attributes, table.md-api-table {
+  padding-left:15px;
+  margin-bottom: 20px;
+}
+table.attributes  tr  td:first-child {
+  font-weight: bold;
+  background-color: #DBEEF5;
+}
+table.attributes  tr  td:last-child {
+  padding-left: 10px;
+}
+
+table.md-api-table:not(.md-css-table)  tr  td:first-child {
+  font-weight: bold;
+}
+
+table.md-css-table .md-css-selector {
+  display: block;
+  padding: 8px 16px;
+
+  /* Offset the padding of the <td> element */
+  margin: -12px -16px 12px -16px;
+
+  background-color: #0C2238;
+  color: #9ccc65;
+}
+
+/* Fix some odd bottom margin */
+table.md-css-table td p {
+  margin: 0.8em 0;
+}
+
+.layout_note {
+  font-size: 0.9em;
+    margin: -5px 40px 0px 20px;
+    color: rgb(1, 57, 114);
+    background-color: rgba(156, 204, 101,0.4);
+    padding: 20px;
+}
+
+.contributor_tables {
+  padding-left: 25px;
+}
+
+.contributor_tables > table {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Provide some layout/padding enhancements for mobile/small devices */
+@media(max-width: 500px) {
+  /* Reduce the size of the nav logo/header */
+  .docs-logo > img {
+    height: 75px;
+    margin-top: 10px;
+  }
+
+  .docs-logo h1 {
+    font-size: 18px;
+    line-height: 2rem;
+  }
+
+  /* Reduce the padding around standard doc content */
+  .docs-ng-view .doc-content {
+    margin: 8px;
+    padding: 0;
+  }
+
+  /* Reduce the padding around doc demos */
+  .docs-ng-view docs-demo {
+    padding: 0;
+  }
+
+  .docs-ng-view docs-demo:first-child {
+    margin-top: 0;
+  }
+
+  .docs-ng-view docs-demo .doc-demo-content {
+    margin: 0;
+  }
 }

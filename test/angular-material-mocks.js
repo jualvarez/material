@@ -16,6 +16,12 @@
 
 'use strict';
 
+  // Allow our code to know when they are running inside of a test so they can expose extra services
+  // that should NOT be exposed to the public but that should be tested.
+  //
+  // As an example, see input.js which exposes some animation-related methods.
+  window._mdMocksIncluded = true;
+
 /**
  * @ngdoc module
  * @name ngMaterial-mock
@@ -47,6 +53,8 @@ angular.module('ngMaterial-mock', [
           $timeout.flush();
           this.flushOutstandingAnimations();
           $timeout.flush();
+          this.flushOutstandingAnimations();
+          $timeout.flush();
         }
       };
     }]);
@@ -60,18 +68,6 @@ angular.module('ngMaterial-mock', [
       * styles while testing...
       */
      $provide.constant('$MD_THEME_CSS', '/**/');
-
-    /**
-     * Intercept to make .expectWithText() to be synchronous
-     */
-    $provide.decorator('$mdAria', function($delegate){
-
-      $delegate.expectWithText = function(element, attrName){
-        $delegate.expect(element, attrName, element.text().trim());
-      };
-
-      return $delegate;
-    });
 
     /**
      * Add throttle() and wrap .flush() to catch `no callbacks present`
@@ -104,13 +100,13 @@ angular.module('ngMaterial-mock', [
       $delegate.flush = function() {
           var args = Array.prototype.slice.call(arguments);
           try      { ngFlush.apply($delegate, args);  }
-          catch(e) { ;           }
+          catch(e) { }
       };
 
       return $delegate;
     });
 
-  }])
+  }]);
 
   /**
    * Stylesheet Mocks used by `animateCss.spec.js`

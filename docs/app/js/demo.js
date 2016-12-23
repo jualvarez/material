@@ -1,9 +1,7 @@
-DocsApp
+angular.module('docsApp')
 .directive('layoutAlign', function() { return angular.noop; })
 .directive('layout', function() { return angular.noop; })
-.directive('docsDemo', [
-  '$mdUtil',
-function($mdUtil) {
+.directive('docsDemo', ['$mdUtil', function($mdUtil) {
   return {
     restrict: 'E',
     scope: true,
@@ -21,6 +19,11 @@ function($mdUtil) {
     self.demoId = $interpolate($attrs.demoId || '')($scope.$parent);
     self.demoTitle = $interpolate($attrs.demoTitle || '')($scope.$parent);
     self.demoModule = $interpolate($attrs.demoModule || '')($scope.$parent);
+
+    $attrs.$observe('demoTitle',  function(value) { self.demoTitle  = value || self.demoTitle; });
+    $attrs.$observe('demoId',     function(value) { self.demoId     = value || self.demoId; });
+    $attrs.$observe('demoModule', function(value) { self.demoModule = value || self.demoModule;  });
+
     self.files = {
       css: [], js: [], html: []
     };
@@ -66,6 +69,7 @@ function($mdUtil) {
         case "index.html" : return "HTML";
         case "script.js" : return "JS";
         case "style.css" : return "CSS";
+        case "style.global.css" : return "CSS";
         default : return name;
       }
     }

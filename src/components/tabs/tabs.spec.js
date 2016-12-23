@@ -39,7 +39,7 @@ describe('<md-tabs>', function () {
   function setup (template, scope) {
     var el;
     inject(function ($compile, $rootScope) {
-      newScope = $rootScope.$new();
+      var newScope = $rootScope.$new();
       for (var key in scope || {}) newScope[key] = scope[key];
       el = $compile(template)(newScope);
       newScope.$apply();
@@ -57,11 +57,24 @@ describe('<md-tabs>', function () {
 
   describe('activating tabs', function () {
 
+    it('should have `._md` class indicator', inject(function() {
+      var tabs = setup(
+        '<md-tabs> ' +
+        '   <md-tab label="a">a</md-tab>' +
+        '   <md-tab label="b">b</md-tab>' +
+        '</md-tabs>'
+      );
+
+      expect(tabs.find('md-tabs-content-wrapper').hasClass('_md')).toBe(true);
+    }));
+
     it('should select first tab by default', function () {
-      var tabs = setup('<md-tabs>\
-            <md-tab label="a">a</md-tab>\
-            <md-tab label="b">b</md-tab>\
-          </md-tabs>');
+      var tabs = setup(
+              '<md-tabs> ' +
+              '   <md-tab label="a">a</md-tab>' +
+              '   <md-tab label="b">b</md-tab>' +
+              '</md-tabs>'
+          );
       expect(tabs.find('md-tab-item').eq(0)).toBeActiveTab();
     });
 
@@ -219,9 +232,122 @@ describe('<md-tabs>', function () {
       expect(tabs1[ 0 ].querySelector('md-tab-content').textContent.trim()).toBe('content that!');
     });
 
+    it('updates pagination and ink styles when string labels change', function(done) {
+      inject(function($rootScope, $timeout) {
+        // Setup our initial label
+        $rootScope.$apply('label = "Some Label"');
+
+        // Init our variables
+        var template = '<md-tabs><md-tab label="{{label}}"></md-tab></md-tabs>';
+        var tabs = setup(template);
+        var ctrl = tabs.controller('mdTabs');
+
+        // Flush the tabs controller timeout for initialization.
+        $timeout.flush();
+
+        // After the first timeout the mutation observer should have been fired once, because
+        // the initialization of the dummy tabs, already causes some mutations.
+        // Use setTimeout to add our expectations to the end of the call stack, after the
+        // MutationObservers have already fired
+        setTimeout(function() {
+          // Setup spies
+          spyOn(ctrl, 'updatePagination');
+          spyOn(ctrl, 'updateInkBarStyles');
+
+          // Update the label to trigger a new update of the pagination and InkBar styles.
+          $rootScope.$apply('label = "Another Label"');
+
+          // Use setTimeout to add our expectations to the end of the call stack, after the
+          // MutationObservers have already fired
+          setTimeout(function() {
+            expect(ctrl.updatePagination).toHaveBeenCalledTimes(1);
+            expect(ctrl.updateInkBarStyles).toHaveBeenCalledTimes(1);
+
+            done();
+          });
+        });
+      })
+    });
+
+    it('updates pagination and ink styles when content label changes', function(done) {
+      inject(function($rootScope, $timeout) {
+        // Setup our initial label
+        $rootScope.$apply('label = "Default Label"');
+
+        // Init our variables
+        var template = '' +
+          '<md-tabs>' +
+            '<md-tab>' +
+              '<md-tab-label>{{ label }}</md-tab-label>' +
+            '</md-tab>' +
+          '</md-tabs>';
+
+        var tabs = setup(template);
+        var ctrl = tabs.controller('mdTabs');
+
+        // Flush the tabs controller timeout for initialization.
+        $timeout.flush();
+
+        // After the first timeout the mutation observer should have been fired once, because
+        // the initialization of the dummy tabs, already causes some mutations.
+        // Use setTimeout to add our expectations to the end of the call stack, after the
+        // MutationObservers have already fired
+        setTimeout(function() {
+          // Setup spies
+          spyOn(ctrl, 'updatePagination');
+          spyOn(ctrl, 'updateInkBarStyles');
+
+          // Update the label to trigger a new update of the pagination and InkBar styles.
+          $rootScope.$apply('label = "New Label"');
+
+          // Use setTimeout to add our expectations to the end of the call stack, after the
+          // MutationObservers have already fired
+          setTimeout(function() {
+            expect(ctrl.updatePagination).toHaveBeenCalledTimes(1);
+            expect(ctrl.updateInkBarStyles).toHaveBeenCalledTimes(1);
+
+            done();
+          });
+        });
+      })
+    });
+
+    it('updates pagination and ink styles when HTML labels change', function(done) {
+      inject(function($rootScope) {
+        // Setup our initial label
+        $rootScope.$apply('label = "Some Label"');
+
+        // Init our variables
+        var template = '<md-tabs><md-tab><md-tab-label>{{label}}</md-tab-label></md-tab></md-tabs>';
+        var tabs = setup(template);
+        var ctrl = tabs.controller('mdTabs');
+
+        // Setup spies
+        spyOn(ctrl, 'updatePagination');
+        spyOn(ctrl, 'updateInkBarStyles');
+
+        // Change the label
+        $rootScope.$apply('label="Another Label"');
+
+        // Use window.setTimeout to add our expectations to the end of the call stack, after the
+        // MutationObservers have already fired
+        window.setTimeout(function() {
+          // Fire expectations
+          expect(ctrl.updatePagination.calls.count()).toBe(1);
+          expect(ctrl.updateInkBarStyles.calls.count()).toBe(1);
+
+          done();
+        });
+      });
+    });
   });
 
   describe('aria', function () {
+    var $timeout;
+
+    beforeEach(inject(function(_$timeout_) {
+      $timeout = _$timeout_;
+    }));
 
     it('should link tab content to tabItem with auto-generated ids', function () {
       var tabs       = setup('<md-tabs>' +
@@ -230,10 +356,11 @@ describe('<md-tabs>', function () {
       var tabItem    = tabs.find('md-dummy-tab');
       var tabContent = angular.element(tabs[ 0 ].querySelector('md-tab-content'));
 
+      $timeout.flush();
+
       expect(tabs.find('md-tabs-canvas').attr('role')).toBe('tablist');
 
       expect(tabItem.attr('id')).toBeTruthy();
-      expect(tabItem.attr('role')).toBe('tab');
       expect(tabItem.attr('aria-controls')).toBe(tabContent.attr('id'));
 
       expect(tabContent.attr('id')).toBeTruthy();
@@ -242,6 +369,36 @@ describe('<md-tabs>', function () {
 
       //Unique ids check
       expect(tabContent.attr('id')).not.toEqual(tabItem.attr('id'));
+    });
+
+    it('should not assign role to dummy tabs', function () {
+      var tabs       = setup('<md-tabs>' +
+                             '<md-tab label="label!">content!</md-tab>' +
+                             '</md-tabs>');
+      var tabItem    = tabs.find('md-dummy-tab');
+
+      expect(tabItem.attr('role')).toBeFalsy();
+    });
+
+    it('should assign role to visible tabs', function () {
+      var tabs       = setup('<md-tabs>' +
+                             '<md-tab label="label!">content!</md-tab>' +
+                             '</md-tabs>');
+      var tabItem    = tabs.find('md-tab-item');
+
+      expect(tabItem.attr('role')).toBe('tab');
+    });
+
+    it('should not set `aria-controls` if the tab does not have content', function () {
+      var tabs = setup(
+        '<md-tabs>' +
+          '<md-tab label="label!"></md-tab>' +
+        '</md-tabs>'
+      );
+
+      $timeout.flush();
+
+      expect(tabs.find('md-dummy-tab').attr('aria-controls')).toBeFalsy();
     });
   });
 
@@ -335,5 +492,88 @@ describe('<md-tabs>', function () {
       expect(element.find('md-tab-item').eq(1).hasClass('md-active')).toBe(false);
       expect(element.find('md-tabs-content-wrapper').hasClass('ng-hide')).toBe(true);
     }));
+  });
+
+  describe('nested tabs', function () {
+    it('should properly nest tabs', inject(function () {
+      var template = '' +
+          '<md-tabs>' +
+          ' <md-tab label="one">' +
+          '   <md-tabs>' +
+          '     <md-tab><md-tab-label>a</md-tab-label></md-tab>' +
+          '     <md-tab><md-tab-label>b</md-tab-label></md-tab>' +
+          '     <md-tab><md-tab-label>c</md-tab-label></md-tab>' +
+          '   </md-tabs>' +
+          ' </md-tab>' +
+          ' <md-tab label="two">two</md-tab>' +
+          '</md-tabs>';
+      var element = setup(template);
+      // first item should be 'one'
+      expect(element.find('md-tab-item').eq(0).text()).toBe('one');
+      // first item in nested tabs should be 'a'
+      expect(element.find('md-tabs').find('md-tab-item').eq(0).text()).toBe('a');
+    }));
+  });
+
+  describe('md-pagination-wrapper', function () {
+    var template =  '<md-tabs md-stretch-tabs="{{stretch}}">' +
+                    '  <md-tab label="label!">content!</md-tab>' +
+                    '</md-tabs>';
+
+    it('should have inline width if md-stretch-tabs="never"',
+      inject(function ($timeout, $document) {
+      var scope = { 'stretch': 'never' };
+      var element = setup(template, scope);
+      // Appending to body is required for style checks
+      angular.element($document.body).append(element);
+      // $timeout.flush required to run nextTick inside init();
+      $timeout.flush();
+      expect(element.find('md-pagination-wrapper').attr('style').indexOf('width')).toBeGreaterThan(-1);
+      element.remove();
+    }));
+
+    it('should not have inline width if md-stretch-tabs="always"',
+      inject(function ($timeout, $document) {
+      var scope = { 'stretch': 'always' };
+      var element = setup(template, scope);
+      // Appending to body is required for style checks
+      angular.element($document.body).append(element);
+      // $timeout.flush required to run nextTick inside init();
+      $timeout.flush();
+      expect(element.find('md-pagination-wrapper').attr('style').indexOf('width')).toBe(-1);
+      element.remove();
+    }));
+  });
+
+  describe('no element content', function() {
+    it('should not add the `md-no-tab-content` class if the element has content', function() {
+      var tabs = setup(
+        '<md-tabs>' +
+           '<md-tab label="label!">content!</md-tab>' +
+        '</md-tabs>'
+      );
+
+      expect(tabs).not.toHaveClass('md-no-tab-content');
+    });
+
+    it('should add the `md-no-tab-content` class if the element does not have content', function() {
+      var tabs = setup(
+        '<md-tabs>' +
+           '<md-tab label="label!"></md-tab>' +
+        '</md-tabs>'
+      );
+
+      expect(tabs).toHaveClass('md-no-tab-content');
+    });
+
+    it('should trim before determining whether the element has content', function() {
+      var tabs = setup(
+        '<md-tabs>' +
+           '<md-tab label="label!">\n\n\n</md-tab>' +
+        '</md-tabs>'
+      );
+
+      expect(tabs).toHaveClass('md-no-tab-content');
+    });
   });
 });

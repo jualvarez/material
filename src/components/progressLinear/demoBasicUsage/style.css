@@ -18,12 +18,12 @@ md-progress-linear {
 }
 
 #loaders > h5 {
-  padding-top: 4px;
+  margin-top: 0;
 }
 
 #loaders > p {
   margin-right: 20px;
-  font-size: 0.90em;
+  margin-bottom: 24px;
 }
 
 p.small {
@@ -51,7 +51,6 @@ p.small > code {
 .container {
   display: block;
   position: relative;
-  height: 100%;
   width: 100%;
   border: 2px solid rgb(170,209,249);
   transition: opacity  0.1s linear;

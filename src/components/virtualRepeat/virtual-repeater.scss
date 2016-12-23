@@ -1,4 +1,4 @@
-$virtual-repeat-scrollbar-width: 16px;
+$virtual-repeat-scrollbar-width: 16px !default;
 
 .md-virtual-repeat-container {
   box-sizing: border-box;
@@ -18,12 +18,13 @@ $virtual-repeat-scrollbar-width: 16px;
     position: absolute;
     right: 0;
     top: 0;
+    -webkit-overflow-scrolling: touch;
   }
 
   .md-virtual-repeat-sizer {
     box-sizing: border-box;
     height: 1px;
-    display: inline-block;
+    display: block;
     margin: 0;
     padding: 0;
     width: 1px;
@@ -35,9 +36,7 @@ $virtual-repeat-scrollbar-width: 16px;
     margin: 0;
     padding: 0;
     position: absolute;
-    // Leave room for the scroll bar.
-    // TODO: Will probably need to perform measurements at runtime.
-    right: $virtual-repeat-scrollbar-width;
+    right: 0;
     top: 0;
   }
 }
@@ -52,7 +51,7 @@ $virtual-repeat-scrollbar-width: 16px;
     // Leave room for the scroll bar.
     // TODO: Will probably need to perform measurements at runtime.
     bottom: $virtual-repeat-scrollbar-width;
-    right: auto;
+    @include rtl-prop(right, left, auto, auto);
     white-space: nowrap;
   }
 }

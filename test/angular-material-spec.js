@@ -8,8 +8,8 @@
 (function() {
 
 
-  // Patch since PhantomJS does not implement click() on HTMLElement. In some 
-  // cases we need to execute the native click on an element. However, jQuery's 
+  // Patch since PhantomJS does not implement click() on HTMLElement. In some
+  // cases we need to execute the native click on an element. However, jQuery's
   // $.fn.click() does not dispatch to the native function on <a> elements, so we
   // can't use it in our implementations: $el[0].click() to correctly dispatch.
   // Borrowed from https://stackoverflow.com/questions/15739263/phantomjs-click-an-element
@@ -91,7 +91,10 @@
     });
 
     /**
-     * Mocks angular.element#focus ONLY for the duration of a particular test.
+     * Mocks the focus method from the HTMLElement prototype for the duration
+     * of the running test.
+     *
+     * The mock will be automatically removed after the test finished.
      *
      * @example
      *
@@ -105,25 +108,34 @@
      * }));
      *
      */
-    jasmine.mockElementFocus = function(test) {
-      var focus = angular.element.prototype.focus;
+    jasmine.mockElementFocus = function() {
+      var _focusFn = HTMLElement.prototype.focus;
+
       inject(function($document) {
-        angular.element.prototype.focus = function() {
-          $document.activeElement = this[0];
+        HTMLElement.prototype.focus = function() {
+          $document.activeElement = this;
         };
       });
+
       // Un-mock focus after the test is done
       afterEach(function() {
-        angular.element.prototype.focus = focus;
+        HTMLElement.prototype.focus = _focusFn;
       });
+
     };
 
     /**
-     * Add special matchers used in the Angular-Material specs
-     *
+     * Add special matchers used in the Angular-Material spec.
      */
     jasmine.addMatchers({
 
+      /**
+       * Asserts that an element has a given class name.
+       * Accepts any of:
+       *   {string} - A CSS selector.
+       *   {angular.JQLite} - The result of a jQuery query.
+       *   {Element} - A DOM element.
+       */
       toHaveClass: function() {
         return {
           compare: function(actual, expected) {
@@ -131,7 +143,7 @@
             var classes = expected.trim().split(/\s+/);
 
             for (var i = 0; i < classes.length; ++i) {
-              if (!angular.element(actual).hasClass(classes[i])) {
+              if (!getElement(actual).hasClass(classes[i])) {
                 results.pass = false;
               }
             }
@@ -141,7 +153,7 @@
             results.message = "";
             results.message += "Expected '";
             results.message += angular.mock.dump(actual);
-            results.message += negation + "to have class '" + expected + "'.";
+            results.message += "'" + negation + "to have class '" + expected + "'.";
 
             return results;
           }
@@ -194,9 +206,89 @@
             return results;
           }
         };
-      }
+      },
 
+      /**
+       * Asserts that an element has keyboard focus in the DOM.
+       * Accepts any of:
+       *   {string} - A CSS selector.
+       *   {angular.JQLite} - The result of a jQuery query.
+       *   {Element} - A DOM element.
+       */
+      toBeFocused: function() {
+        return {
+          'compare': function(actual) {
+            var pass =  getElement(actual)[0] === document.activeElement;
+            var not = pass ? 'not ' : '';
+            return {
+              'pass': pass,
+              'message': 'Expected element ' + not + 'to have focus.'
+            };
+          }
+        };
+      },
+
+      /**
+       * Asserts that a given selector matches one or more items.
+       * Accepts any of:
+       *   {string} - A CSS selector.
+       *   {angular.JQLite} - The result of a jQuery query.
+       *   {Element} - A DOM element.
+       */
+      toExist: function() {
+        return {
+          compare: function(actual) {
+            var el = getElement(actual);
+            var pass = el.length > 0;
+            var not = pass ? 'not ' : '';
+
+            return {
+              pass: pass,
+              message: 'Expected "' + actual +
+              '" ' + not + 'to match element(s), ' +
+              'but found ' + el.length +
+              ' items in the DOM'
+            };
+          }
+        };
+      },
+
+      /**
+       * Asserts that a given element contains a given substring in
+       * its innerHTML property.
+       * Accepts any of:
+       *   {string} - A CSS selector.
+       *   {angular.JQLite} - The result of a jQuery query.
+       *   {Element} - A DOM element.
+       */
+      toContainHtml: function() {
+        return {
+          compare: function(actual, expected) {
+            var el = getElement(actual);
+            var html = el.html();
+            var pass = html.indexOf(expected) !== -1;
+            var not = pass ? 'not ' : '';
+
+            return {
+              pass: pass,
+              message: 'Expected element ' + not + 'to contain the html ' +
+              '[' + expected + '] in [' + html + ']'
+            };
+          }
+        };
+      }
     });
+
+    /**
+     * Returns the angular element associated with a css selector or element.
+     * @param el {string|!angular.JQLite|!Element}
+     * @returns {!angular.JQLite}
+     */
+    function getElement(el) {
+      var queryResult = angular.isString(el) ?
+          document.querySelector(el) : el;
+      return angular.element(queryResult);
+    }
 
   });
 

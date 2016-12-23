@@ -1,16 +1,27 @@
 describe('mdCard directive', function() {
 
-  beforeEach(module('material.components.card'));
+  var $mdThemingMock = function() { $mdThemingMock.called = true; };
+  var $compile;
+  var $rootScope;
 
-  it('should have the default theme class when the md-theme attribute is not defined', inject(function($compile, $rootScope) {
-    var card = $compile('<md-card></md-card>')($rootScope.$new());
-    $rootScope.$apply();
-    expect(card.hasClass('md-default-theme')).toBe(true);
-  }));
+  beforeEach(function() {
+    module('material.components.card');
+    module(function($provide) {
+      $provide.value('$mdTheming', $mdThemingMock);
+    });
+    inject(function(_$compile_, _$rootScope_) {
+      $compile = _$compile_;
+      $rootScope = _$rootScope_;
+    });
+  });
 
-  it('should have the correct theme class when the md-theme attribute is defined', inject(function($compile, $rootScope) {
-    var card = $compile('<md-card md-theme="green"></md-card>')($rootScope.$new());
-    $rootScope.$apply();
-    expect(card.hasClass('md-green-theme')).toBe(true);
-  }));
+  it('should be themable', function() {
+    $compile('<md-card></md-card>')($rootScope.$new());
+    expect($mdThemingMock.called).toBe(true);
+  });
+
+  it('should have `._md` class indicator', function() {
+    var element = $compile('<md-card></md-card>')($rootScope.$new());
+    expect(element.hasClass('_md')).toBe(true);
+  });
 });

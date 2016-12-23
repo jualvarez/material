@@ -1,6 +1,7 @@
 
 describe('mdCheckbox', function() {
   var CHECKED_CSS = 'md-checked';
+  var INDETERMINATE_CSS = 'md-indeterminate';
   var $compile, $log, pageScope, $mdConstant;
 
   beforeEach(module('ngAria', 'material.components.checkbox'));
@@ -126,14 +127,51 @@ describe('mdCheckbox', function() {
     expect(checkbox[0]).not.toHaveClass('md-focused');
   });
 
-  it('should set focus state on focus and remove on blur', function() {
+  it('should apply focus effect with keyboard interaction', function() {
     var checkbox = compileAndLink('<md-checkbox ng-model="blue"></md-checkbox>');
+    var body = angular.element(document.body);
 
+    // Fake a keyboard interaction for the $mdInteraction service.
+    body.triggerHandler('keydown');
     checkbox.triggerHandler('focus');
+
     expect(checkbox[0]).toHaveClass('md-focused');
 
     checkbox.triggerHandler('blur');
     expect(checkbox[0]).not.toHaveClass('md-focused');
+  });
+
+  it('should not apply focus effect with mouse interaction', function() {
+    var checkbox = compileAndLink('<md-checkbox ng-model="blue"></md-checkbox>');
+    var body = angular.element(document.body);
+
+    // Fake a mouse interaction for the $mdInteraction service.
+    body.triggerHandler('mouse');
+    checkbox.triggerHandler('focus');
+
+    expect(checkbox[0]).not.toHaveClass('md-focused');
+
+    checkbox.triggerHandler('blur');
+    expect(checkbox[0]).not.toHaveClass('md-focused');
+  });
+
+  it('should redirect focus of container to the checkbox element', function() {
+    var checkbox = compileAndLink('<md-checkbox ng-model="blue"></md-checkbox>');
+
+    document.body.appendChild(checkbox[0]);
+
+    var container = checkbox.children().eq(0);
+    expect(container[0]).toHaveClass('md-container');
+
+    // We simulate IE11's focus bug, which always focuses an unfocusable div
+    // https://connect.microsoft.com/IE/feedback/details/1028411/
+    container[0].tabIndex = -1;
+
+    container.triggerHandler('focus');
+
+    expect(document.activeElement).toBe(checkbox[0]);
+
+    checkbox.remove();
   });
 
   it('should set focus state on keyboard interaction after clicking', function() {
@@ -226,6 +264,78 @@ describe('mdCheckbox', function() {
       checkbox.triggerHandler('click');
       expect(isChecked(checkbox)).toBe(false);
       expect(checkbox.hasClass('ng-invalid')).toBe(true);
+    });
+
+    it('properly unsets the md-checked CSS if ng-checked is undefined', function() {
+      var checkbox = compileAndLink('<md-checkbox ng-checked="value"></md-checkbox>');
+
+      expect(checkbox.hasClass(CHECKED_CSS)).toBe(false);
+    });
+
+    it('should mark the checkbox as selected on load with ng-checked', function() {
+      pageScope.isChecked = function() { return true; };
+
+      var checkbox = compileAndLink('<md-checkbox ng-model="checked" ng-checked="isChecked()"></md-checkbox>');
+
+      expect(checkbox).toHaveClass(CHECKED_CSS);
+    });
+
+    describe('with the md-indeterminate attribute', function() {
+
+      it('should set md-indeterminate attr to true by default', function() {
+        var checkbox = compileAndLink('<md-checkbox md-indeterminate></md-checkbox>');
+
+        expect(checkbox).toHaveClass(INDETERMINATE_CSS);
+      });
+
+      it('should be set "md-indeterminate" class according to a passed in function', function() {
+        pageScope.isIndeterminate = function() { return true; };
+
+        var checkbox = compileAndLink('<md-checkbox md-indeterminate="isIndeterminate()"></md-checkbox>');
+
+        expect(checkbox).toHaveClass(INDETERMINATE_CSS);
+      });
+
+      it('should set aria-checked attr to "mixed"', function() {
+        var checkbox = compileAndLink('<md-checkbox md-indeterminate></md-checkbox>');
+
+        expect(checkbox.attr('aria-checked')).toEqual('mixed');
+      });
+
+      it('should never have both the "md-indeterminate" and "md-checked" classes at the same time', function() {
+        pageScope.isChecked = function() { return true; };
+
+        var checkbox = compileAndLink('<md-checkbox md-indeterminate ng-checked="isChecked()"></md-checkbox>');
+
+        expect(checkbox).toHaveClass(INDETERMINATE_CSS);
+        expect(checkbox).not.toHaveClass(CHECKED_CSS);
+      });
+
+      it('should change from the indeterminate to checked state correctly', function() {
+        var checked = false;
+        pageScope.isChecked = function() { return checked; };
+        pageScope.isIndet = function() { return !checked; };
+
+        var checkbox = compileAndLink('<md-checkbox md-indeterminate="isIndet()" ng-checked="isChecked()"></md-checkbox>');
+
+        expect(checkbox).toHaveClass(INDETERMINATE_CSS);
+        expect(checkbox).not.toHaveClass(CHECKED_CSS);
+
+        checked = true;
+        pageScope.$apply();
+
+        expect(checkbox).not.toHaveClass(INDETERMINATE_CSS);
+        expect(checkbox).toHaveClass(CHECKED_CSS);
+      });
+
+      it('should mark the checkbox as selected, if the model is true and "md-indeterminate" is false', function() {
+        pageScope.checked = true;
+        var checkbox = compileAndLink('<md-checkbox ng-model="checked" md-indeterminate="false"></md-checkbox>');
+
+        expect(checkbox).toHaveClass(CHECKED_CSS);
+        expect(checkbox).not.toHaveClass(INDETERMINATE_CSS);
+      });
+
     });
   });
 });

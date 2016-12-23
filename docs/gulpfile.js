@@ -15,6 +15,7 @@ var utils = require('../scripts/gulp-utils.js');
 var karma = require('karma').server;
 var argv = require('minimist')(process.argv.slice(2));
 var gutil = require('gulp-util');
+var series = require('stream-series');
 
 var config = {
   demoFolder: 'demo-partials'
@@ -36,11 +37,13 @@ gulp.task('demos', function() {
       var demoIndex = _(demos)
         .groupBy('moduleName')
         .map(function(moduleDemos, moduleName) {
+          var componentName = moduleName.split('.').pop();
           return {
-            name: moduleName,
-            label: utils.humanizeCamelCase(moduleName.split('.').pop()),
+            name: componentName,
+            moduleName: moduleName,
+            label: utils.humanizeCamelCase(componentName),
             demos: moduleDemos,
-            url: '/demo/' + moduleName
+            url: 'demo/' + componentName
           };
         })
         .value();
@@ -67,7 +70,7 @@ function generateDemos() {
 
       utils.readModuleDemos(moduleName, function(demoId) {
         return lazypipe()
-          .pipe(gulpif, /.css$/, transformCss(demoId))
+          .pipe(gulpif, /^(?!.+global\.).*css/, transformCss(demoId))
           .pipe(gulp.dest, 'dist/docs/demo-partials/' + name)
         ();
       })
@@ -109,17 +112,28 @@ gulp.task('docs-demo-scripts', ['demos'], function() {
 });
 
 gulp.task('docs-js-dependencies', ['build'], function() {
-  return gulp.src(['dist/angular-material.js', 'dist/angular-material.min.js'])
+  return gulp.src(['dist/angular-material.js', 'dist/angular-material.min.js', 'docs/app/contributors.json'])
     .pipe(gulp.dest('dist/docs'));
 });
 
 gulp.task('docs-js', ['docs-app', 'docs-html2js', 'demos', 'build', 'docs-js-dependencies'], function() {
-  return gulp.src([
-    'node_modules/angularytics/dist/angularytics.js',
-    'dist/docs/js/**/*.js'
-  ])
-  .pipe(concat('docs.js'))
-  .pipe(gulpif(!argv.dev, uglify()))
+  var preLoadJs = ['docs/app/js/preload.js'];
+  if (process.argv.indexOf('--jquery') != -1) {
+    preLoadJs.push('node_modules/jquery/dist/jquery.js');
+  }
+
+  return series(
+    gulp.src([
+      'node_modules/angularytics/dist/angularytics.js',
+      'dist/docs/js/app.js', // Load the Angular module initialization at first.
+      'dist/docs/js/**/*.js'
+    ])
+      .pipe(concat('docs.js'))
+      .pipe(gulpif(!argv.dev, uglify())),
+    gulp.src(preLoadJs)
+      .pipe(concat('preload.js'))
+      .pipe(gulpif(!argv.dev, uglify()))
+  )
   .pipe(gulp.dest('dist/docs'));
 });
 
@@ -139,6 +153,7 @@ gulp.task('docs-css', ['docs-app', 'build', 'docs-css-dependencies'], function()
     'docs/app/css/style.css'
   ])
   .pipe(concat('docs.css'))
+  .pipe(utils.autoprefix())
   .pipe(gulp.dest('dist/docs'));
 });
 
