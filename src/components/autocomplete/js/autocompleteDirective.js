@@ -221,31 +221,32 @@ function MdAutocomplete ($$mdSvgRegistry) {
     controller:   'MdAutocompleteCtrl',
     controllerAs: '$mdAutocompleteCtrl',
     scope:        {
-      inputName:        '@mdInputName',
-      inputMinlength:   '@mdInputMinlength',
-      inputMaxlength:   '@mdInputMaxlength',
-      searchText:       '=?mdSearchText',
-      selectedItem:     '=?mdSelectedItem',
-      itemsExpr:        '@mdItems',
-      itemText:         '&mdItemText',
-      placeholder:      '@placeholder',
-      noCache:          '=?mdNoCache',
-      requireMatch:     '=?mdRequireMatch',
-      selectOnMatch:    '=?mdSelectOnMatch',
-      matchInsensitive: '=?mdMatchCaseInsensitive',
-      itemChange:       '&?mdSelectedItemChange',
-      textChange:       '&?mdSearchTextChange',
-      minLength:        '=?mdMinLength',
-      delay:            '=?mdDelay',
-      autofocus:        '=?mdAutofocus',
-      floatingLabel:    '@?mdFloatingLabel',
-      autoselect:       '=?mdAutoselect',
-      menuClass:        '@?mdMenuClass',
-      inputId:          '@?mdInputId',
-      escapeOptions:    '@?mdEscapeOptions',
-      dropdownItems:    '=?mdDropdownItems',
-      dropdownPosition: '@?mdDropdownPosition',
-      clearButton:      '=?mdClearButton'
+      inputName:          '@mdInputName',
+      inputMinlength:     '@mdInputMinlength',
+      inputMaxlength:     '@mdInputMaxlength',
+      searchText:         '=?mdSearchText',
+      selectedItem:       '=?mdSelectedItem',
+      itemsExpr:          '@mdItems',
+      itemText:           '&mdItemText',
+      placeholder:        '@placeholder',
+      noCache:            '=?mdNoCache',
+      requireMatch:       '=?mdRequireMatch',
+      selectOnMatch:      '=?mdSelectOnMatch',
+      matchInsensitive:   '=?mdMatchCaseInsensitive',
+      itemChange:         '&?mdSelectedItemChange',
+      textChange:         '&?mdSearchTextChange',
+      minLength:          '=?mdMinLength',
+      delay:              '=?mdDelay',
+      autofocus:          '=?mdAutofocus',
+      floatingLabel:      '@?mdFloatingLabel',
+      autoselect:         '=?mdAutoselect',
+      menuClass:          '@?mdMenuClass',
+      menuContainerClass: '@?mdMenuContainerClass',
+      inputId:            '@?mdInputId',
+      escapeOptions:      '@?mdEscapeOptions',
+      dropdownItems:      '=?mdDropdownItems',
+      dropdownPosition:   '@?mdDropdownPosition',
+      clearButton:        '=?mdClearButton'
     },
     compile: function(tElement, tAttrs) {
       var attributes = ['md-select-on-focus', 'md-no-asterisk', 'ng-trim', 'ng-pattern'];
@@ -304,7 +305,7 @@ function MdAutocomplete ($$mdSvgRegistry) {
               ng-mouseup="$mdAutocompleteCtrl.mouseUp()"\
               ng-hide="$mdAutocompleteCtrl.hidden"\
               class="md-autocomplete-suggestions-container md-whiteframe-z1"\
-              ng-class="{ \'md-not-found\': $mdAutocompleteCtrl.notFoundVisible() }"\
+              ng-class="[menuContainerClass, { \'md-not-found\': $mdAutocompleteCtrl.notFoundVisible() }]"\
               role="presentation">\
             <ul class="md-autocomplete-suggestions"\
                 ng-class="::menuClass"\
