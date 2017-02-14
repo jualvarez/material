@@ -608,6 +608,10 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
    * @returns {*}
    */
   function getDisplayValue (item) {
+    var itemText = getItemText(item);
+    return $q.when(itemText === undefined ? item : itemText);
+
+    /*
     return $q.when(getItemText(item) || item).then(function(itemText) {
       if (itemText && !angular.isString(itemText)) {
         $log.warn('md-autocomplete: Could not resolve display value to a string. ' +
@@ -616,6 +620,7 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
 
       return itemText;
     });
+    */
 
     /**
      * Getter function to invoke user-defined expression (in the directive)
