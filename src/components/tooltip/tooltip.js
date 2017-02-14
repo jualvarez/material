@@ -46,7 +46,7 @@ angular
  *     Defaults to bottom.
  */
 function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
-    $mdUtil, $mdTheming, $mdPanel, $$mdTooltipRegistry) {
+    $mdUtil, $mdPanel, $$mdTooltipRegistry) {
 
   var ENTER_EVENTS = 'focus touchstart mouseenter';
   var LEAVE_EVENTS = 'blur touchcancel mouseleave';
@@ -81,9 +81,6 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
     var origin, position, panelPosition, panelRef, autohide, showTimeout,
         elementFocusedOnWindowBlur = null;
 
-    // Initialize the theming of the tooltip.
-    $mdTheming(element);
-
     // Set defaults
     setDefaults();
 
@@ -92,7 +89,6 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
 
     // Remove the element from its current DOM position.
     element.detach();
-    element.attr('role', 'tooltip');
 
     updatePosition();
     bindEvents();
@@ -108,8 +104,9 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
 
     function addAriaLabel(override) {
       if (override || !parent.attr('aria-label')) {
-        var rawText = override || element.text().trim();
-        var interpolatedText = $interpolate(rawText)(parent.scope());
+        // Only interpolate the text from the HTML element because otherwise the custom text
+        // could be interpolated twice and cause XSS violations.
+        var interpolatedText = override || $interpolate(element.text().trim())(scope.$parent);
         parent.attr('aria-label', interpolatedText);
       }
     }
@@ -301,8 +298,9 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
       parent.one('$destroy', onElementDestroy);
       scope.$on('$destroy', function() {
         setVisible(false);
-        element.remove();
+        panelRef && panelRef.destroy();
         attributeObserver && attributeObserver.disconnect();
+        element.remove();
       });
 
       // Updates the aria-label when the element text changes. This watch
@@ -364,7 +362,6 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
       if (!panelRef) {
         var id = 'tooltip-' + $mdUtil.nextUid();
         var attachTo = angular.element(document.body);
-        var content = element.html().trim();
         var panelAnimation = $mdPanel.newPanelAnimation()
             .openFrom(parent)
             .closeTo(parent)
@@ -376,7 +373,7 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
         var panelConfig = {
           id: id,
           attachTo: attachTo,
-          template: content,
+          contentElement: element,
           propagateContainerEvents: true,
           panelClass: 'md-tooltip ' + origin,
           animation: panelAnimation,
@@ -388,7 +385,9 @@ function MdTooltipDirective($timeout, $window, $$rAF, $document, $interpolate,
         panelRef = $mdPanel.create(panelConfig);
       }
 
-      panelRef.open();
+      panelRef.open().then(function() {
+        panelRef.panelEl.attr('role', 'tooltip');
+      });
     }
 
     function hideTooltip() {

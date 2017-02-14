@@ -8,6 +8,8 @@ describe('<md-contact-chips>', function() {
           md-contact-image="image"\
           md-contact-email="email"\
           md-highlight-flags="i"\
+          md-min-length="1"\
+          md-chip-append-delay="2000"\
           placeholder="To">\
       </md-contact-chips>';
 
@@ -63,6 +65,13 @@ describe('<md-contact-chips>', function() {
       expect(ctrl.highlightFlags).toEqual('i');
     });
 
+    it('forwards the md-chips-append-delay attribute to the md-chips', function() {
+      var element = buildChips(CONTACT_CHIPS_TEMPLATE);
+      var chipsCtrl = element.find('md-chips').controller('mdChips');
+
+      expect(chipsCtrl.chipAppendDelay).toEqual(2000);
+    });
+
     it('renders an image element for contacts with an image property', function() {
         scope.contacts.push(scope.allContacts[2]);
 
@@ -84,6 +93,15 @@ describe('<md-contact-chips>', function() {
 
         expect(chip.find('img').length).toBe(0);
     });
+
+    it('should forward md-min-length attribute to the autocomplete', inject(function() {
+        var element = buildChips(CONTACT_CHIPS_TEMPLATE);
+
+        var autocompleteElement = element.find('md-autocomplete');
+        var autocompleteCtrl = autocompleteElement.controller('mdAutocomplete');
+
+        expect(autocompleteCtrl.scope.minLength).toBe(parseInt(element.attr('md-min-length')));
+      }));
 
     describe('filtering selected items', function() {
       it('should filter', inject(function() {
