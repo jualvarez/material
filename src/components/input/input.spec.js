@@ -471,13 +471,13 @@ describe('md-input-container directive', function() {
     pageScope.placeholder = 'bar';
     pageScope.$digest();
 
-    // We should check again to make sure that Angular didn't
+    // We should check again to make sure that AngularJS didn't
     // re-add the placeholder attribute and cause double labels.
     expect(input.hasAttribute('placeholder')).toBe(false);
     expect(label.textContent).toEqual('bar');
   });
 
-  it('should put an aria-label on the input when no label is present', inject(function($timeout) {
+  it('should not copy placeholder text to aria-label on the input', inject(function($timeout) {
     var el = $compile(
       '<form name="form">' +
       '  <md-input-container md-no-float>' +
@@ -489,20 +489,8 @@ describe('md-input-container directive', function() {
     $timeout.flush();
 
     var input = el.find('input');
-    expect(input.attr('aria-label')).toBe('baz');
+    expect(input.attr('aria-label')).toBeUndefined();
   }));
-
-  it('should evaluate the placeholder expression before setting the aria-label', function() {
-    pageScope.placeholder = 'baz';
-    var el = $compile(
-      '<form name="form">' +
-      '  <md-input-container md-no-float>' +
-      '    <input placeholder="{{placeholder}}" ng-model="foo" name="foo">' +
-      '  </md-input-container>' +
-      '</form>')(pageScope);
-
-    expect(el.find('input').attr('aria-label')).toBe('baz');
-  });
 
   it('should put the container in "has value" state when input has a static value', function() {
     var scope = pageScope.$new();

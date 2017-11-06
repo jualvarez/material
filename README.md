@@ -7,7 +7,7 @@ material design specification for use in AngularJS single-page applications (SPA
 
 ![venn diagram](https://cloud.githubusercontent.com/assets/210413/5077572/30dfc2f0-6e6a-11e4-9723-07c918128f4f.png)
 
-AngularJS Material is the reference implementation of Google's Material Design specification. This project provides a rich set of reusable, well-tested, and accessible UI components for the the AngularJS eco-system.
+AngularJS Material is the reference implementation of Google's Material Design Specification. AngularJS Material includes a rich set of reusable, well-tested, and accessible UI components.
 
 Quick Links:
 
@@ -17,7 +17,7 @@ Quick Links:
 *  [Installing](#installing)
 
 
-Please note that using AngularJS Material requires the use of > **AngularJS 1.3.x** to **AngularJS 1.6.x** . AngularJS
+Please note that using AngularJS Material requires the use of **AngularJS 1.3.x** or higher. AngularJS
 Material is targeted for all browsers with browser versions shown below with green boxes:
 
 ![ngm1_browser_support](https://cloud.githubusercontent.com/assets/210413/18553899/f3fbfbca-7b27-11e6-81c9-2937950c808e.png)
@@ -44,9 +44,9 @@ Based on the number of unique contributors and repository forks, GitHub Octovers
 
 AngularJS Material has revised/improved its build processes. To preserve stability with applications currently using AngularJS Material, we will have three (3) types of releases:
 
-*  `major` :  this type of release will be the Angular 2.x efforts maintained in a separate repository called [Material2](https://github.com/angular/material2). This type of release will not be used within AngularJS Material 1.x.
+*  `major` :  major releases will be done as part of the latest iteration of AngularJS Material on a [separate repo](https://github.com/angular/material2). This type of release will not be used within AngularJS Material.
 *  `minor`:  aka `master` contains patch release changes AND breaking changes and new features
-*  `patch`:  non-breaking changes (no API, CSS, UX changes that will cause breaks in existing ngMaterial applications)
+*  `patch`:  non-breaking changes (no API, CSS, UX changes that will cause breaks in existing AngularJS Material applications)
 
 ##### Patch Releases
 
@@ -62,7 +62,7 @@ Our formal release of `minor` builds is much less frequent; probably 1x / Quarte
 
 The Changelog may contain releases for `patch` or `minor`. If you do not see a fix listed in the Changelog but the issue has been resolved or the PR merged, then those changes will be `master` available in the next *minor* release.
 
-> for the purposes of AngularJS Material 1.x, you *could* think of the patch releases as being *minor* changes and the 'minor' releases as being *major* changes.
+> for the purposes of AngularJS Material, you *could* think of the patch releases as being *minor* changes and the 'minor' releases as being *major* changes.
 
 
 ## <a name="contributing"></a> Contributing
@@ -148,20 +148,20 @@ when using online tools such as [CodePen](http://codepen.io/), [Plunkr](http://p
 ```html
   <head>
 
-    <!-- AngularJS Material CSS now available via Google CDN; version 1.0.7 used here -->
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.11.2/angular-material.min.css">
+    <!-- AngularJS Material CSS now available via Google CDN; version 1.1.4 used here -->
+   <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.min.css">
 
   </head>
   <body>
 
     <!-- AngularJS Material Dependencies -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.11/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.11/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.11/angular-aria.min.js"></script>
 
 
-    <!-- AngularJS Material Javascript now available via Google CDN; version 1.0.7 used here -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.js"></script>
+    <!-- AngularJS Material Javascript now available via Google CDN; version 1.1.4 used here -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.min.js"></script>
   </body>
 ```
 
@@ -179,9 +179,9 @@ pull directly from the distribution GitHub
   <body>
 
     <!-- AngularJS Material Dependencies -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-aria.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.11/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.11/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.11/angular-aria.js"></script>
 
     <!-- AngularJS Material Javascript using GitCDN to load directly from `bower-material/master` -->
     <script src="https://gitcdn.link/repo/angular/bower-material/master/angular-material.js"></script>
